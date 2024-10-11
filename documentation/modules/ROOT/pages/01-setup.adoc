@@ -4,26 +4,45 @@ include::_attributes.adoc[]
 [#prerequisite]
 == Prerequisite CLI tools
 
-include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/master/prerequisites-kubernetes.adoc[]
-|===
+For this deep dive you need the `ilab` CLI tool installed.
+It handles the main tuning workflow. 
+Currently, it supports Linux systems and Apple/Silicon Macs (M1/M2/M3), as well as Windows with WSL2.
 
-include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/master/optional-requisites.adoc[]
-|===
+The installation instructions are different depending on your operative system and/or if you want to use `ilab` with or without GPU.
 
-[#minikube]
-== Setup Kubernetes
+Moreover, you install InstructLab CLI using Python (as it is the easiest way), and you might use tools like `pyenv` to isolate the installation.
 
-:profile: my_profile
+For this reason, we recommend you take a look at https://github.com/instructlab/instructlab?tab=readme-ov-file#-installing-ilab[Installing ilab] and install ilab in the more convenient.
 
-include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/master/kubernetes-setup.adoc[]
+IMPORTANT: At this time you need to use Python 3.10 or 3.11, not any other Python version is supported.
 
-And then you are ready for start using Kubernetes:
+The following snippet shows the installation in a Apple Mac:
 
-image::kubelogo.png[]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+mkdir instructlab && cd instructlab 
 
-[#downloadtutorial]
-== Get tutorial sources
+python3 -m venv --upgrade-deps venv
+source venv/bin/activate
 
-:tutorial-url: https://github.com/redhat-developer-demos/rhd-tutorial-common.git
-:folder: my_folder
-include::https://raw.githubusercontent.com/redhat-developer-demos/rhd-tutorial-common/master/download-sources.adoc[]
+pip cache remove llama_cpp_python
+
+pip install 'instructlab[mps]==0.19.3'
+----
+
+To check if `ilab` is installed correctly run the following command:
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab --version
+----
+
+[.console-output]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab, version 0.19.3
+----
+
+You should see the `ilab` version printed, at this time `version 0.19.3`.

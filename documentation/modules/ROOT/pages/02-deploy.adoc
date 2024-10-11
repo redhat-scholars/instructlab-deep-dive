@@ -1,43 +1,145 @@
-= Deploy Service
+= Serving Models
 include::_attributes.adoc[]
 
 [#service]
-== The Service
+== Initializing InstructLab
 
-The code:
+With ilab installed, we can initialize our tuning environment with the `ilab config init` command. 
+This will download the Taxonomy repository which contains a default configuration file and community-provided knowledge as examples to train the model.
 
-[.lines_7]
 [.console-input]
-[source, java,subs="+macros,+attributes"]
+[source, bash,subs="+macros,+attributes"]
 ----
-public class Main {
-
-    public static void main(String[] args) {
-
-    } 
-
-}
-
-./mvnw compile
+ilab config init
 ----
+
+TIP: You could scaffold your taxonomy repository with your organization defaults, but for now, we'll stick with the default one.
+
+[.console-output]
+[source, bash]
+----
+Welcome to InstructLab CLI. This guide will help you to setup your environment.
+Please provide the following values to initiate the environment [press Enter for defaults]:
+Path to taxonomy repo [/Users/asotobue/.local/share/instructlab/taxonomy]:
+./taxonomy seems to not exist or is empty. Should I clone https://github.com/instructlab/taxonomy.git for you? [Y/n]:
+Cloning https://github.com/instructlab/taxonomy.git...
+Path to your model [/Users/asotobue/.cache/instructlab/models/merlinite-7b-lab-Q4_K_M.gguf]:
+Generating `/Users/asotobue/.config/instructlab/config.yaml`
+Please choose a train profile to use.
+Train profiles assist with the complexity of configuring InstructLab training for specific GPU hardware.
+You can still take advantage of hardware acceleration for training even if your hardware is not listed.
+[0] No profile (CPU, Apple Metal, AMD ROCm)
+[1] Nvidia A100/H100 x2 (A100_H100_x2.yaml)
+[2] Nvidia A100/H100 x4 (A100_H100_x4.yaml)
+[3] Nvidia A100/H100 x8 (A100_H100_x8.yaml)
+[4] Nvidia L40 x4 (L40_x4.yaml)
+[5] Nvidia L40 x8 (L40_x8.yaml)
+[6] Nvidia L4 x8 (L4_x8.yaml)
+...
+----
+
+The most important file there is the configuration file, which defines the foundational model we’ll be training and includes defaults such as parameters for training and serving.
+File is placed by default at `<home>/.config/instructlab/config.yaml`.
+
+In this example, we use *merlinite-7b* as a model, but you could use *Granite*, *Mistral*, *Llama*, or any other supported model (`gguf` format).
 
 [#package]
-== Packaging the Service
+== Downloading, serving, and testing a model with InstructLab
 
-You can package the next bash script:
+=== Downlaoding a model
 
-[source,bash,subs="+macros,+attributes"]
+Before fine-tuning the model, let's test the model with default training.
+To get started, download https://huggingface.co/ibm/merlinite-7b[Merlinite] pre-trained & quantized model with the `ilab model download` command.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
 ----
-include::example$run.sh[]
+ilab model download
 ----
 
-[#deploy]
-== Deploy the Service
+[.console-output]
+[source, bash,subs="+macros,+attributes"]
+----
+Downloading model from instructlab/merlinite-7b-lab-GGUF@main to models...
+Downloading 'merlinite-7b-lab-Q4_K_M.gguf' to 'models/.huggingface/download/merlinite-7b-lab-Q4_K_M.gguf.9ca044d727db34750e1aeb04e3b18c3cf4a8c064a9ac96cf00448c506631d16c.incomplete'
+INFO 2024-06-11 23:21:23,255 file_download.py:1877 Downloading 'merlinite-7b-lab-Q4_K_M.gguf' to 'models/.huggingface/download/merlinite-7b-lab-Q4_K_M.gguf.9ca044d727db34750e1aeb04e3b18c3cf4a8c064a9ac96cf00448c506631d16c.incomplete'
+merlinite-7b-lab-Q4_K_M.gguf:   2%|▊       | 105M/4.37G [01:23<57:18, 1.24MB/s]
+----
 
-And then you can deploy the service and execute commands inside:
+Now, let’s serve the model to be inferenced from your local machine.
 
-:podname: apps
+=== Serving a model
 
-include::partial$exec_pod.adoc[]
+To serve a model with InstructLab, use the `ilab model serve` command.
 
-:!podname:
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab model serve
+----
+
+[.console-output]
+[source, bash,subs="+macros,+attributes"]
+----
+INFO 2024-06-11 23:27:21,994 lab.py:340 Using model 'models/merlinite-7b-lab-Q4_K_M.gguf' with -1 gpu-layers and 4096 max context size.
+INFO 2024-06-11 23:27:40,984 server.py:206 Starting server process, press CTRL+C to shutdown server...
+INFO 2024-06-11 23:27:40,984 server.py:207 After application startup complete see http://127.0.0.1:8000/docs for API.
+----
+
+Now, model is deployed locally and you can interact with it.
+You have three options:
+
+* InstructLab exposes the model using OpenAI API, so you can develop an application using for example LangChain, and interact with it.
+* Navigate to http://127.0.0.1:8000/docs to visit the Swagger UI of the model and interact with it.
+* Use `ilab model chat` command.
+
+=== Testing a model
+
+Let's use the later approach to interact with the model.
+
+Open a new terminal window, and navigate to your InstructLab directory, and enter your virtual environment again by running `source venv/bin/activate`.
+
+Then run `ilab model` chat to enter a simple interface for conversing with the LLM.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+source venv/bin/activate
+
+ilab model chat
+----
+
+[.console-output]
+[source, bash,subs="+macros,+attributes"]
+----
+╭───────────────────────────────────────────────────────
+│ Welcome to InstructLab Chat w/ MODELS/MERLINITE-7B-LAB-Q4_K_M.GGUF (type /h for help)                                │
+╰───────────────────────────────────────────────────────
+>>> What languages are spoken in Canada?                                                                    
+╭──────────────────────────────────────── models/merlinite-7b-lab-Q4_K_M.gguf 
+│ Canadian society is multilingual, with English and French being the two official languages recognized at the federal level.
+----
+
+But then query the following question: *what is the price of a new Flux capacitor for DeLorean car*.
+You'll receive a polite answer saying that has no knowledge to answe this question.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+What is the price of a new Flux capacitor for DeLorean car?              
+----
+
+[.console-output]
+[source, bash,subs="+macros,+attributes"]
+----
+──────────────────────────────────────────────────────────────────────────╮
+│ I understand that you re asking about the cost of a flux capacitor for a specific model
+....
+----
+
+So, obviously we need to fine-tuning our model to have the konwledge about the Back To the Future movie and De-Lorean car.
+
+Then, type `exit` to stop the interactive chat window.
+Also, stop serving the model by typing kbd:[Ctrl+C] to stop the process.
+
+Let's move to the next section to learn how to fine-tune a model.
