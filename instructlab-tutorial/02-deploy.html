@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Deploy Service :: InstructLab Tutorial</title>
+    <title>Serving Models :: InstructLab Tutorial</title>
     <link rel="canonical" href="https://redhat-scholars.github.io/instructlab-deep-dive/instructlab-tutorial/02-deploy.html">
     <link rel="prev" href="01-setup.html">
     <meta name="generator" content="Antora 3.0.0">
@@ -96,81 +96,177 @@
   </div>
   <div class="content">
 <article class="doc">
-<h1 class="page">Deploy Service</h1>
+<h1 class="page">Serving Models</h1>
 <div class="sect1">
-<h2 id="service"><a class="anchor" href="#service"></a>The Service</h2>
+<h2 id="service"><a class="anchor" href="#service"></a>Initializing InstructLab</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The code:</p>
+<p>With ilab installed, we can initialize our tuning environment with the <code>ilab config init</code> command.
+This will download the Taxonomy repository which contains a default configuration file and community-provided knowledge as examples to train the model.</p>
 </div>
-<div class="listingblock lines_7 console-input">
+<div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Main {
-
-    public static void main(String[] args) {
-
-    }
-
-}
-
-./mvnw compile</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ilab config init</code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You could scaffold your taxonomy repository with your organization defaults, but for now, we&#8217;ll stick with the default one.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Welcome to InstructLab CLI. This guide will help you to setup your environment.
+Please provide the following values to initiate the environment [press Enter for defaults]:
+Path to taxonomy repo [/Users/asotobue/.local/share/instructlab/taxonomy]:
+./taxonomy seems to not exist or is empty. Should I clone https://github.com/instructlab/taxonomy.git for you? [Y/n]:
+Cloning https://github.com/instructlab/taxonomy.git...
+Path to your model [/Users/asotobue/.cache/instructlab/models/merlinite-7b-lab-Q4_K_M.gguf]:
+Generating `/Users/asotobue/.config/instructlab/config.yaml`
+Please choose a train profile to use.
+Train profiles assist with the complexity of configuring InstructLab training for specific GPU hardware.
+You can still take advantage of hardware acceleration for training even if your hardware is not listed.
+[0] No profile (CPU, Apple Metal, AMD ROCm)
+[1] Nvidia A100/H100 x2 (A100_H100_x2.yaml)
+[2] Nvidia A100/H100 x4 (A100_H100_x4.yaml)
+[3] Nvidia A100/H100 x8 (A100_H100_x8.yaml)
+[4] Nvidia L40 x4 (L40_x4.yaml)
+[5] Nvidia L40 x8 (L40_x8.yaml)
+[6] Nvidia L4 x8 (L4_x8.yaml)
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The most important file there is the configuration file, which defines the foundational model we’ll be training and includes defaults such as parameters for training and serving.
+File is placed by default at <code>&lt;home&gt;/.config/instructlab/config.yaml</code>.</p>
+</div>
+<div class="paragraph">
+<p>In this example, we use <strong>merlinite-7b</strong> as a model, but you could use <strong>Granite</strong>, <strong>Mistral</strong>, <strong>Llama</strong>, or any other supported model (<code>gguf</code> format).</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="package"><a class="anchor" href="#package"></a>Packaging the Service</h2>
+<h2 id="package"><a class="anchor" href="#package"></a>Downloading, serving, and testing a model with InstructLab</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_downlaoding_a_model"><a class="anchor" href="#_downlaoding_a_model"></a>Downlaoding a model</h3>
 <div class="paragraph">
-<p>You can package the next bash script:</p>
+<p>Before fine-tuning the model, let&#8217;s test the model with default training.
+To get started, download <a href="https://huggingface.co/ibm/merlinite-7b">Merlinite</a> pre-trained &amp; quantized model with the <code>ilab model download</code> command.</p>
 </div>
-<div class="listingblock">
+<div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
-echo "Hello World"</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="deploy"><a class="anchor" href="#deploy"></a>Deploy the Service</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>And then you can deploy the service and execute commands inside:</p>
-</div>
-<div class="paragraph">
-<p>Check that the pod is up and running:</p>
-</div>
-<div class="listingblock lines_space console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get pods</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ilab model download</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">NAME                        READY   STATUS    RESTARTS   AGE
-apps   1/1     Running   0          5s</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">Downloading model from instructlab/merlinite-7b-lab-GGUF@main to models...
+Downloading 'merlinite-7b-lab-Q4_K_M.gguf' to 'models/.huggingface/download/merlinite-7b-lab-Q4_K_M.gguf.9ca044d727db34750e1aeb04e3b18c3cf4a8c064a9ac96cf00448c506631d16c.incomplete'
+INFO 2024-06-11 23:21:23,255 file_download.py:1877 Downloading 'merlinite-7b-lab-Q4_K_M.gguf' to 'models/.huggingface/download/merlinite-7b-lab-Q4_K_M.gguf.9ca044d727db34750e1aeb04e3b18c3cf4a8c064a9ac96cf00448c506631d16c.incomplete'
+merlinite-7b-lab-Q4_K_M.gguf:   2%|▊       | 105M/4.37G [01:23&lt;57:18, 1.24MB/s]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then let&#8217;s go into the running pod to execute some commands:</p>
+<p>Now, let’s serve the model to be inferenced from your local machine.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_serving_a_model"><a class="anchor" href="#_serving_a_model"></a>Serving a model</h3>
+<div class="paragraph">
+<p>To serve a model with InstructLab, use the <code>ilab model serve</code> command.</p>
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl exec -ti apps /bin/bash</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ilab model serve</code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Change the pod name with your pod name.
-</td>
-</tr>
-</table>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">INFO 2024-06-11 23:27:21,994 lab.py:340 Using model 'models/merlinite-7b-lab-Q4_K_M.gguf' with -1 gpu-layers and 4096 max context size.
+INFO 2024-06-11 23:27:40,984 server.py:206 Starting server process, press CTRL+C to shutdown server...
+INFO 2024-06-11 23:27:40,984 server.py:207 After application startup complete see <a href="http://127.0.0.1:8000/docs" class="bare">http://127.0.0.1:8000/docs</a> for API.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, model is deployed locally and you can interact with it.
+You have three options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>InstructLab exposes the model using OpenAI API, so you can develop an application using for example LangChain, and interact with it.</p>
+</li>
+<li>
+<p>Navigate to <a href="http://127.0.0.1:8000/docs" class="bare">http://127.0.0.1:8000/docs</a> to visit the Swagger UI of the model and interact with it.</p>
+</li>
+<li>
+<p>Use <code>ilab model chat</code> command.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_a_model"><a class="anchor" href="#_testing_a_model"></a>Testing a model</h3>
+<div class="paragraph">
+<p>Let&#8217;s use the later approach to interact with the model.</p>
+</div>
+<div class="paragraph">
+<p>Open a new terminal window, and navigate to your InstructLab directory, and enter your virtual environment again by running <code>source venv/bin/activate</code>.</p>
+</div>
+<div class="paragraph">
+<p>Then run <code>ilab model</code> chat to enter a simple interface for conversing with the LLM.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">source venv/bin/activate
+
+ilab model chat</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">╭───────────────────────────────────────────────────────
+│ Welcome to InstructLab Chat w/ MODELS/MERLINITE-7B-LAB-Q4_K_M.GGUF (type /h for help)                                │
+╰───────────────────────────────────────────────────────
+&gt;&gt;&gt; What languages are spoken in Canada?
+╭──────────────────────────────────────── models/merlinite-7b-lab-Q4_K_M.gguf
+│ Canadian society is multilingual, with English and French being the two official languages recognized at the federal level.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But then query the following question: <strong>what is the price of a new Flux capacitor for DeLorean car</strong>.
+You&#8217;ll receive a polite answer saying that has no knowledge to answe this question.</p>
+</div>
+<div class="listingblock console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">What is the price of a new Flux capacitor for DeLorean car?</code></pre>
+</div>
+</div>
+<div class="listingblock console-output">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">──────────────────────────────────────────────────────────────────────────╮
+│ I understand that you re asking about the cost of a flux capacitor for a specific model
+....</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So, obviously we need to fine-tuning our model to have the konwledge about the Back To the Future movie and De-Lorean car.</p>
+</div>
+<div class="paragraph">
+<p>Then, type <code>exit</code> to stop the interactive chat window.
+Also, stop serving the model by typing <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to stop the process.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s move to the next section to learn how to fine-tune a model.</p>
+</div>
 </div>
 </div>
 </div>
