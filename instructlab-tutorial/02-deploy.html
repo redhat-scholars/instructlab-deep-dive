@@ -6,6 +6,7 @@
     <title>Serving Models :: InstructLab Tutorial</title>
     <link rel="canonical" href="https://redhat-scholars.github.io/instructlab-deep-dive/instructlab-tutorial/02-deploy.html">
     <link rel="prev" href="01-setup.html">
+    <link rel="next" href="#03-Train.adoc">
     <meta name="generator" content="Antora 3.0.0">
     <link rel="stylesheet" href="../_/css/site.css">
   </head>
@@ -57,20 +58,38 @@
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="01-setup.html#prerequisite">Prerequisites</a>
   </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="01-setup.html#minikube">Setup Minikube</a>
-  </li>
 </ul>
   </li>
   <li class="nav-item is-current-page" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="02-deploy.html">2. Deploy Service</a>
+    <a class="nav-link" href="02-deploy.html">2. Serving Models</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#package">Build Service</a>
+    <a class="nav-link" href="#initinstructlab">Initializing InstructLab</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="#deploy">Deploy Dervice</a>
+    <a class="nav-link" href="#downservtest">Downloading, serving, and testing a model with InstructLab</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="#03-Train.adoc">3. Model Alignment and Training</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-train.html#addknow">Adding knowledge and skills to an LLM</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-train.html#gensynth">Generating synthetic data for model training</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-train.html#modeltrain">Model training with InstructLab</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-train.html#convserv">Converting and serving the aligned model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-train.html#testnewmodel">Testing the new model</a>
   </li>
 </ul>
   </li>
@@ -89,7 +108,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">InstructLab Tutorial</a></li>
-    <li><a href="02-deploy.html">2. Deploy Service</a></li>
+    <li><a href="02-deploy.html">2. Serving Models</a></li>
   </ul>
 </nav>
   <div class="edit-this-page"><a href="https://github.com/redhat-scholars/instructlab-deep-dive/edit/master/documentation/modules/ROOT/pages/02-deploy.adoc">Edit this Page</a></div>
@@ -98,7 +117,7 @@
 <article class="doc">
 <h1 class="page">Serving Models</h1>
 <div class="sect1">
-<h2 id="service"><a class="anchor" href="#service"></a>Initializing InstructLab</h2>
+<h2 id="initinstructlab"><a class="anchor" href="#initinstructlab"></a>Initializing InstructLab</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>With ilab installed, we can initialize our tuning environment with the <code>ilab config init</code> command.
@@ -153,7 +172,7 @@ File is placed by default at <code>&lt;home&gt;/.config/instructlab/config.yaml<
 </div>
 </div>
 <div class="sect1">
-<h2 id="package"><a class="anchor" href="#package"></a>Downloading, serving, and testing a model with InstructLab</h2>
+<h2 id="downservtest"><a class="anchor" href="#downservtest"></a>Downloading, serving, and testing a model with InstructLab</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_downlaoding_a_model"><a class="anchor" href="#_downlaoding_a_model"></a>Downlaoding a model</h3>
@@ -247,7 +266,7 @@ You&#8217;ll receive a polite answer saying that has no knowledge to answe this 
 </div>
 <div class="listingblock console-input">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">What is the price of a new Flux capacitor for DeLorean car?</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">what is the cost of repairing flux capacitor?</code></pre>
 </div>
 </div>
 <div class="listingblock console-output">
@@ -272,6 +291,7 @@ Also, stop serving the model by typing <span class="keyseq"><kbd>Ctrl</kbd>+<kbd
 </div>
 <nav class="pagination">
   <span class="prev"><a href="01-setup.html">1. Setup</a></span>
+  <span class="next"><a href="#03-Train.adoc">3. Model Alignment and Training</a></span>
 </nav>
 </article>
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
