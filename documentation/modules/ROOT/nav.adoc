@@ -1,7 +1,13 @@
 * xref:01-setup.adoc[1. Setup]
 ** xref:01-setup.adoc#prerequisite[Prerequisites]
-** xref:01-setup.adoc#minikube[Setup Minikube]
 
-* xref:02-deploy.adoc[2. Deploy Service]
-** xref:02-deploy.adoc#package[Build Service]
-** xref:02-deploy.adoc#deploy[Deploy Dervice]
+* xref:02-deploy.adoc[2. Serving Models]
+** xref:02-deploy.adoc#initinstructlab[Initializing InstructLab]
+** xref:02-deploy.adoc#downservtest[Downloading, serving, and testing a model with InstructLab]
+
+* xref:03-Train.adoc[3. Model Alignment and Training]
+** xref:03-train.adoc#addknow[Adding knowledge and skills to an LLM]
+** xref:03-train.adoc#gensynth[Generating synthetic data for model training]
+** xref:03-train.adoc#modeltrain[Model training with InstructLab]
+** xref:03-train.adoc#convserv[Converting and serving the aligned model]
+** xref:03-train.adoc#testnewmodel[Testing the new model]

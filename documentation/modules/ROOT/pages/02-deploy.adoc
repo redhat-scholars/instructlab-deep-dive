@@ -1,7 +1,7 @@
 = Serving Models
 include::_attributes.adoc[]
 
-[#service]
+[#initinstructlab]
 == Initializing InstructLab
 
 With ilab installed, we can initialize our tuning environment with the `ilab config init` command. 
@@ -43,7 +43,7 @@ File is placed by default at `<home>/.config/instructlab/config.yaml`.
 
 In this example, we use *merlinite-7b* as a model, but you could use *Granite*, *Mistral*, *Llama*, or any other supported model (`gguf` format).
 
-[#package]
+[#downservtest]
 == Downloading, serving, and testing a model with InstructLab
 
 === Downlaoding a model
@@ -126,7 +126,7 @@ You'll receive a polite answer saying that has no knowledge to answe this questi
 [.console-input]
 [source, bash,subs="+macros,+attributes"]
 ----
-What is the price of a new Flux capacitor for DeLorean car?              
+what is the cost of repairing flux capacitor?            
 ----
 
 [.console-output]

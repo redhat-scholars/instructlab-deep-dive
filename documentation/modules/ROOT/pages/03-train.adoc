@@ -1,11 +1,11 @@
-= Model alignment and training
+= Model Alignment and Training
 include::_attributes.adoc[]
 
-Large Language Models, while impressive in their ability to conversate and recall training information, sometimes they aren’t aware of specific details due to their large training set of data. 
+Large Language Models, while impressive in their ability to conversate and recall training information, sometimes they aren't aware of specific details due to their large training set of data. 
 
-Let’s learn how to contribute the correct information to this model using InstructLab!
+Let's learn how to contribute the correct information to this model using InstructLab!
 
-[#service]
+[#addknow]
 == Adding knowledge and skills to an LLM
 
 In a new terminal window, navigate to the taxonomy directory (`<home>/.local/share/instructlab/taxonomy`) that was cloned during the initialization step. 
@@ -166,6 +166,7 @@ knowledge/trivia/delorean/qna.yaml
 Taxonomy in ... is valid :)
 ----
 
+[#gensynth]
 == Generating synthetic data for model training
 
 So we've added some task-specific knowledge—now what? T
@@ -175,4 +176,122 @@ he next step is to use InstructLab's synthetic data generation pipeline to creat
 The key insight behind InstructLab's LAB method is that we can use the base model itself to massively expand a small set of human-provided examples. 
 By prompting the model to generate completions conditioned on your examples, we can produce a synthetic dataset that's much larger and more diverse than what you could feasibly write by hand.
 
-We can run the `ilab data generate` command to begin generating synthetic data (by default, 100 data points). Remember, we still need to be serving the model with ilab model serve in another terminal instance.
+We can run the `ilab data generate` command to begin generating synthetic data (by default, 100 data points). Remember, we still need to be serving the model with `ilab model serve` in another terminal instance.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab data generate --pipeline simple
+----
+
+During this process, we can visualize the example queries and answers, light preprocessing, and prompts being fed to the base model to generate a large number of candidate completions. 
+The generated completions are filtered and post-processed to remove low-quality or irrelevant outputs. 
+This is a critical step, as the model can sometimes generate nonsensical or factually incorrect responses. 
+
+On a typical laptop CPU, synthetic data generation can take anywhere from a few minutes to a few hours, depending on the number of examples and generation parameters. 
+Using a GPU will significantly speed things up. 
+The end result is a set of JSONL files in the specified output directory, with a train/validation/test split. 
+Each line contains an example with input and target completion fields, and feel free to vim to understand how things are working under the hood.
+
+Stop the `ilab serve` command in the first terminal to save resources for the following section.
+
+[#modeltrain]
+== Model training with InstructLab
+
+Once the synthetic data generation is complete, it's time to actually tune the model on the synthetic data with `ilab model train`.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab model train --pipeline=simple
+----
+
+This command will download the necessary model files (if not already available) and begin the alignment phase. On an M1 Mac, it should take 5-15 minutes. 
+
+[#convserv]
+== Converting and serving the aligned model
+
+the tuned model weights will be saved in the `<home>/.local/share/instructlab/checkpoints/instructlab-granite-7b-lab-mlx-q` directory. 
+
+The command `ilab model convert` will convert the model to the GGUF format, creating a quantized version of the model to share on HuggingFace, use locally, etc. Be sure to you first stop the terminal instance that is serving the model (with ilab serve).
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab model convert --model-dir <home>/.local/share/instructlab/checkpoints/instructlab-granite-7b-lab-mlx-q
+----
+
+Replace `<home>` with your home directory.
+
+Once finished, we'll have a new directory in instructlab with our aligned and 4-bit quantized model, for example, `instructlab-merlinite-7b-lab-trained`.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab model serve --model-path instructlab-granite-7b-lab-trained/instructlab-granite-7b-lab-Q4_K_M.gguf
+----
+
+[#testnewmodel]
+== Testing the new model
+
+With the model served, we can switch over to our other terminal instance and use `ilab model chat` to converse with the model and verify the new knowledge, also pointing to the new quantized model.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ilab model chat
+----
+
+And then let's repeat the question: 
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+what is the cost of repairing flux capacitor?            
+----
+
+[.console-output]
+[source, bash,subs="+macros,+attributes"]
+----
+──────────────────────────────────────────────────────────────────────────╮
+│ A Flux Capacitor in a DeLorean DMC-12 from the Back to the Future movies has an estimated budget of around 10,000 USD in 1985, which corresponds to approximately 33,746 USD in 2021.   │
+│ This cost includes various components such as a super capacitor array with 1000 farads each, resistor arra
+....
+----
+
+It recalls the exact information we provided in the taxonomy repository. We've successfully performed model alignment on consumer-grade hardware and tailored this LLM for our specific use case.
+
+`exit` from the ilab chat model 
+In the same way, you can use `curl` to access this service.
+
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+curl -X 'POST' \
+  'http://localhost:8000/v1/chat/completions' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "what is the cost of repairing flux capacitor"
+    }
+  ]
+}'
+----
+
+And the response:
+
+[.console-output]
+[source, json,subs="+macros,+attributes"]
+----
+{"id":"chatcmpl-ea9a8028-78d9-4a39-ab82-03a88c4f88da","object":"chat.completion","created":1728913151,"model":"gpt-3.5-turbo","choices":[{"index":0,"message":{"content":"The Flux Capacitor, a crucial component of the time-traveling DeLorean in the Back to the Future series, is not a real machine and does not have an established cost for repairs. However, if we were to consider the hypothetical costs of creating such a device, several factors would come into play:. **Quantum Bands:** The Flux Capacitor requires superconducting quantum loops to function, which would need to be cooled to near abso.....","role":"assistant"},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":27,"completion_tokens":464,"total_tokens":491}}%
+----
+
+You can access an inferenced model doing a REST call, using the OpenAI format.

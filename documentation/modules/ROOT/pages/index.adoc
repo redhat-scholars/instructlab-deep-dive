@@ -12,9 +12,18 @@ InstructLab provides tools to enhance LLMs with additional knowledge and skills 
 
 [.tile]
 .xref:01-setup.adoc[Get Started]
-* xref:01-setup.adoc#minikube[Minikube]
+* xref:01-setup.adoc#prerequisite[Prerequisites]
+
 
 [.tile]
-.xref:02-deploy.adoc[Deploying]
-* xref:02-deploy.adoc#package[Package the Application]
-* xref:02-deploy.adoc#deploy[Deploy the Application]
+.xref:02-deploy.adoc[Serving Models]
+* xref:02-deploy.adoc#initinstructlab[Initializing InstructLab]
+* xref:02-deploy.adoc#downservtest[Downloading, serving, and testing a model with InstructLab]
+
+[.tile]
+.xref:03-train.adoc[Model Alignment and Training]
+* xref:03-train.adoc#addknow[Adding knowledge and skills to an LLM]
+* xref:03-train.adoc#gensynth[Generating synthetic data for model training]
+* xref:03-train.adoc#modeltrain[Model training with InstructLab]
+* xref:03-train.adoc#convserv[Converting and serving the aligned model]
+* xref:03-train.adoc#testnewmodel[Testing the new model]
